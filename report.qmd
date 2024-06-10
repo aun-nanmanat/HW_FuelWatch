@@ -1,0 +1,527 @@
+---
+title: "Fuel prices over time in Western Australia"
+author: "Nanmanat Disayakamonpan"
+format:   
+  html:                     
+    standalone: true        # These are some YAML configurations which are not essential but you may play with:
+                            # standalone means that quarto renders to a html-file with a header 
+                            # and all css javascript needed
+    embed-resources: true   # The html will also embed all figures you produce 
+                            # (usually they would be in a directory). So differently from traditional html files
+                            # this html file would be self-contained. You could for example email it as one file 
+    code-fold: true         # We enable the code folding such that we only need to look at code if we want
+                            # More info at https://quarto.org/docs/output-formats/html-publishing.html
+    number-sections: true   # We number the sections
+---
+
+This analysis works with the dataset `FuelWatch` which is a fuel monitoring service created by the Government of Western Australia. It provides information about fuel prices at the various petrol stations in Western Australia for the last 12 months, specifically a sample of fuel prices from October 2022 to September 2023. 
+
+# Data Overview
+```{r}
+#| label: packages-data
+#| message: false 
+#| echo: false
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(dplyr)
+library(readr)
+```
+
+```{r}
+#| label: downloadfile1
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-10-2022.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file1.csv")
+```
+
+```{r}
+#| label: downloadfile2
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-11-2022.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file2.csv")
+```
+
+```{r}
+#| label: downloadfile3
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-12-2022.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file3.csv")
+```
+
+```{r}
+#| label: downloadfile4
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-01-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file4.csv")
+```
+
+```{r}
+#| label: downloadfile5
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-02-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file5.csv")
+```
+
+```{r}
+#| label: downloadfile6
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-03-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file6.csv")
+```
+
+```{r}
+#| label: downloadfile7
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-04-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file7.csv")
+```
+
+```{r}
+#| label: downloadfile8
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-05-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file8.csv")
+```
+
+```{r}
+#| label: downloadfile9
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-06-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file9.csv")
+```
+
+```{r}
+#| label: downloadfile10
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-07-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file10.csv")
+```
+
+```{r}
+#| label: downloadfile11
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-08-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file11.csv")
+```
+
+```{r}
+#| label: downloadfile12
+#| message: false 
+#| echo: false
+download_FuelWatch_file_if_not_exists <- function(filename) {
+  url <- "https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-09-2023.csv"
+
+  if (!file.exists(filename)) {
+    download.file(url, destfile = filename, method = "auto", quiet = FALSE)
+    cat("File", filename, "downloaded.\n")
+  } else {
+    cat("File", filename, "already exists.\n")
+  }
+}
+
+#download_FuelWatch_file_if_not_exists("file12.csv")
+```
+
+```{r}
+#| label: downloadfile
+#| message: false 
+#| echo: false
+# List of file names
+file_names <- c("file1.csv", "file2.csv", "file3.csv", "file4.csv", "file5.csv", "file6.csv", "file7.csv", "file8.csv","file9.csv", "file10.csv", "file11.csv", "file12.csv")
+
+FuelWatch <- bind_rows(lapply(file_names, read_csv))
+
+write_csv(FuelWatch, "FuelWatch.csv")
+```
+
+There are eleven variables in the data set. In total there is information about **publish date**, **trading names**, **brand description**, **product price**, and **products**. Additionally there are **address**, **location**, **postcode**, **area**, and **region** observations. 
+
+* **VARIABLE DESCRIPTION**
+
+    + ***PUBLISH_DATE***
+        - Date when published price is offered at a station. For example, “01/04/2023” in dd/mm/yyyy format.
+    + ***TRADING_NAME***
+        - Registered business name of the reporting service station such as “7-Eleven” or “BP”.
+    + ***BRAND_DESCRIPTION***
+        - Service station brand such as “BP" or “Independent” if unbranded.
+    + ***PRODUCT_DESCRIPTION***
+        - Fuel type such as Petrol, Diesel, Gas, Biofuel, or others.
+    + ***PRODUCT_PRICE***
+        - Fuel price such as “135.9” (in Australian cents). 
+    + ***ADDRESS***
+        - Street address of the service station such as “102 Princess Rd”. 
+    + ***LOCATION***
+        - Suburb where station is located such as "BYFORD".
+    + ***POSTCODE***
+        - Area postcode such as “6210”.
+    + ***AREA_DESCRIPTION***
+        - Describes sub-areas within metropolitan Perth such as “East/Hills”, “North of River”, or “South of River”.
+    + ***REGION_DESCRIPTION***
+        - Describes the regional area where is the station is located such as “Metro”, “Peel”, or “Kimberley”.
+        
+# Visual Data Exploration
+
+## Station Service Brand Data Visualization
+
+### Number of data points for each station service brand
+
+In the following visualization, we present a barplot that illustrates the distribution of data points among different brands, with the y-axis labels ordered based on the number of data points each brand contributes.
+```{r}
+#| label: datapointforbrand
+#| echo: false
+filtered_ULP1 <- FuelWatch %>% 
+  filter(PRODUCT_DESCRIPTION == "ULP") %>% 
+  count(BRAND_DESCRIPTION) %>% 
+  arrange(desc(n))
+
+ggplot(filtered_ULP1, aes(x = n, y = reorder(BRAND_DESCRIPTION, n), fill = BRAND_DESCRIPTION)) +
+  geom_col() +
+  labs(title = "Number of Data Points for Each Fuel Service Station Brand",
+       x = "Number of Data Points",
+       y = "",
+       fill = "Fuel Station Service Brand") +
+  scale_x_continuous(labels = scales::label_number(scale = 1e-3, suffix = "k")) +
+  theme_minimal()
+```
+### The average price trends for different station service brands over time
+
+In the following visualization, we summarize the data by calculating the mean price for each brand and date. The resulting line plot illustrates the average price trends for different brands over time.
+```{r}
+#| label: brandsummarizing
+#| echo: false
+FuelWatch$PUBLISH_DATE <- as.Date(FuelWatch$PUBLISH_DATE, format = "%d/%m/%Y")
+
+averageprice_brand <- FuelWatch %>%
+  filter(PRODUCT_DESCRIPTION == "ULP") %>%
+  mutate(MonthYear = format(PUBLISH_DATE, "%b %y")) %>%
+  group_by(BRAND_DESCRIPTION, MonthYear) %>%
+  summarise(mean_price = mean(PRODUCT_PRICE, na.rm = TRUE), .groups = 'drop') %>%
+  filter(!is.na(mean_price))
+
+month_order <- c("Oct 22", "Nov 22", "Dec 22", "Jan 23", "Feb 23", "Mar 23", "Apr 23", "May 23", "Jun 23", "Jul 23", "Aug 23", "Sep 23")
+
+averageprice_brand$MonthYear <- factor(averageprice_brand$MonthYear, levels = month_order)
+
+ggplot(averageprice_brand, aes(x = MonthYear, y = mean_price, 
+                               color = BRAND_DESCRIPTION, group = BRAND_DESCRIPTION)) +
+  geom_line() +
+  labs(title = "Average Fuel Price Trends for Each Fuel Service Station Brand Over Time",
+       x = "",
+       y = "Average Fuel Price (in Australian cents)",
+       color = "Fuel Station Service Brand") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+## Station Service Data Visualization based on Region
+
+### Number of data points for each station service based on region
+
+As we delve into the dataset, this bar plot shows insights into the distribution of data points across different regions, with the y-axis labels highlighting the regions by the number of data points they encompass.
+
+```{r}
+#| label: datapointforregion
+#| echo: false
+filtered_ULP2 <- FuelWatch %>% 
+  filter(PRODUCT_DESCRIPTION == "ULP")
+
+region_counts <- table(filtered_ULP2$REGION_DESCRIPTION)
+
+plot_data <- data.frame(Region = names(region_counts), Count = as.numeric(region_counts))
+
+plot_data <- plot_data[order(plot_data$Count, decreasing = TRUE), ]
+
+ggplot(plot_data, aes(x = Count, y = reorder(Region, Count), fill = Region)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Data Points for Each Fuel Station Service based on Region",
+       x = "Number of Data Points",
+       y = "",
+       fill = "Region in Western Australia") +
+  scale_x_continuous(labels = scales::label_number(scale = 1e-3, suffix = "k")) +
+  theme_minimal()
+```
+
+### The average price trends for different regions of station service over time
+
+In our exploration of the dataset, we seek to distill insights into the temporal trends of average fuel prices across various regions. This line plot illuminates the dynamic patterns, offering a nuanced view of how prices evolve over time in different geographic areas.
+```{r}
+#| label: regionsummarizing
+#| echo: false
+FuelWatch$PUBLISH_DATE <- as.Date(FuelWatch$PUBLISH_DATE, format = "%d/%m/%Y")
+
+averageprice_region <- FuelWatch %>%
+  filter(PRODUCT_DESCRIPTION == "ULP") %>%
+  mutate(MonthYear = format(PUBLISH_DATE, "%b %y")) %>%
+  group_by(REGION_DESCRIPTION, MonthYear) %>%
+  summarise(mean_price = mean(PRODUCT_PRICE, na.rm = TRUE), .groups = 'drop') %>% 
+  filter(!is.na(mean_price))
+
+month_order <- c("Oct 22", "Nov 22", "Dec 22", "Jan 23", "Feb 23", "Mar 23", "Apr 23", "May 23", "Jun 23", "Jul 23", "Aug 23", "Sep 23")
+
+averageprice_region$MonthYear <- factor(averageprice_region$MonthYear, levels = month_order)
+
+ggplot(averageprice_region, aes(x = MonthYear, y = mean_price, 
+                                color = REGION_DESCRIPTION, group = REGION_DESCRIPTION)) +
+  geom_line(linewidth = 0.8) +
+  labs(title = "Average Fuel Price Trends for Each Fuel Station Service based on Region Over Time",
+       x = "",
+       y = "Average Fuel Price (in Australian cents)",
+       color = "Region in Western Australia") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+## Areas in the region “Peel”
+
+### Number of data points for each area in Peel
+
+As we narrow our focus to the region "Peel," this bar plot visually shows the distribution of data points across various areas within Peel. 
+```{r}
+#| label: datapointforpeel
+#| echo: false
+filtered_ULP3 <- FuelWatch %>%
+  filter(PRODUCT_DESCRIPTION == "ULP", REGION_DESCRIPTION == "Peel")
+
+area_counts <- table(filtered_ULP3$AREA_DESCRIPTION)
+
+plot_data <- data.frame(Area = names(area_counts), Count = as.numeric(area_counts))
+
+plot_data <- plot_data[order(plot_data$Count, decreasing = TRUE), ]
+
+ggplot(plot_data, aes(x = Count, y = reorder(Area, Count), fill = Area)) +
+  geom_bar(stat = "identity", width = 0.6) +
+  labs(title = "Number of Data Points for Each Area in Peel",
+       x = "Number of Data Points",
+       y = "",
+       fill = "Area in Peel") +
+  scale_fill_manual(values =  c("Mandurah" = "darkblue", "Murray" = "blue", "Waroona" = "deepskyblue")) +
+  scale_x_continuous(labels = scales::label_number(scale = 1e-3, suffix = "k")) +
+  theme_minimal()
+```
+### The average price trends for each area in Peel over time
+
+Delving into the granularity of specific areas within the region, this line plot provides an insightful narrative of the average fuel prices over time. Each line represents a distinct area, offering a comprehensive view of price trends within the specified region.
+
+```{r}
+#| label: peelsummarizing
+#| echo: false
+FuelWatch$PUBLISH_DATE <- as.Date(FuelWatch$PUBLISH_DATE, format = "%d/%m/%Y")
+
+peel_data <- FuelWatch %>%
+  filter(PRODUCT_DESCRIPTION == "ULP", REGION_DESCRIPTION == "Peel")
+
+averageprice_peel <- peel_data %>%
+  mutate(MonthYear = format(PUBLISH_DATE, "%b %y")) %>%
+  group_by(AREA_DESCRIPTION, MonthYear) %>%
+  summarise(mean_price = mean(PRODUCT_PRICE, na.rm = TRUE), .groups = 'drop') %>% 
+  filter(!is.na(mean_price))
+
+month_order <- c("Oct 22", "Nov 22", "Dec 22", "Jan 23", "Feb 23", "Mar 23", "Apr 23", "May 23", "Jun 23", "Jul 23", "Aug 23", "Sep 23")
+
+averageprice_peel$MonthYear <- factor(averageprice_peel$MonthYear, levels = month_order)
+
+ggplot(averageprice_peel, aes(x = MonthYear, y = mean_price, 
+                              color = AREA_DESCRIPTION, group = AREA_DESCRIPTION)) +
+  geom_line(linewidth = 0.8) +
+  labs(title = "Average Fuel Price Trends for Each Area in Peel Over Time",
+       x = "",
+       y = "Average Fuel Price (in Australian cents)",
+       color = "Area in Peel") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+## Petrol stations in the area “Murray” (in Peel)
+
+Exploring the price trends of petrol stations in the "Murray" area within Peel, this line plot illustrates the fluctuation in product prices over time, with each line representing a distinct petrol station (TRADING_NAME).
+```{r}
+#| label: petrolstationinmurray
+#| echo: false
+FuelWatch$PUBLISH_DATE <- as.Date(FuelWatch$PUBLISH_DATE, format = "%d/%m/%Y")
+
+murray_data <- FuelWatch %>%
+  filter(PRODUCT_DESCRIPTION == "ULP", REGION_DESCRIPTION == "Peel", AREA_DESCRIPTION == "Murray") %>% 
+  mutate(MonthYear = format(PUBLISH_DATE, "%b %y")) %>%
+  group_by(TRADING_NAME, MonthYear) %>% 
+  summarise(PRODUCT_PRICE = mean(PRODUCT_PRICE, na.rm = TRUE), .groups = 'drop')
+
+month_order <- c("Oct 22", "Nov 22", "Dec 22", "Jan 23", "Feb 23", "Mar 23", "Apr 23", "May 23", "Jun 23", "Jul 23", "Aug 23", "Sep 23")
+
+murray_data$MonthYear <- factor(murray_data$MonthYear, levels = month_order)
+
+ggplot(murray_data, aes(x = MonthYear, y = PRODUCT_PRICE, 
+                        color = TRADING_NAME, group = TRADING_NAME)) +
+  geom_line(linewidth = 0.8) +
+  labs(title = "Price Trends for Petrol Stations in Murray",
+       x = "",
+       y = "Fuel Price (in Australian cents)",
+       color = "Trading Name of the Petrol Station") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+```
+
+# The different patterns of price dynamics
+
+## Price Spikes and Rapid Drops
+
+The first pattern that can be observed in Western Australia is **occasional price spikes followed by rapid price drops**. This typically occurs due to sudden changes in global crude oil prices, disruptions in the supply chain such as geopolitical events, exchange rate, or changes in government taxes or regulations. 
+
+To clarify, tightening global crude oil prices and a weak Australian dollar are responsible for pushing petrol prices higher. Moreover, in July 2023 OPEC+ led by Saudi Arabia but also includes Russia, made a decision to extend oil production cuts by more than a million barrels a day until the end of the year. As such, we could safely say that a decrease in supply means an increase in oil prices.
+
+## Regional Price Variations and Remote Area
+
+Western Australia is a vast region with varying market conditions and transportation costs. As a result, there can be significant price variations between different regions within the state. **Remote areas or regions with limited competition may experience higher petrol prices compared to urban areas.** This pattern is driven by factors like transportation costs, supply chain logistics, and market dynamics specific to each region.
+
+According to the line graph 2.2.2, you can see that Kimberley in Western Australia has the higher average fuel price than other regions because of the remote location. Kimberley is a vast and remote region in Western Australia, characterized by long distances and limited access to fuel supply infrastructure. The remote location can result in higher transportation and distribution costs for delivering fuel to the region, which can contribute to the higher average prices.
+
+## Competition Among Fuel Retailers in Each Area
+
+As you can see in the line graph 2.3.2, it is noticeable that the Waroona area has the highest average fuel price in the Peel region. On the contrary, Mandurah and Murray have the lower price. The reason behind this is that **the level of competition among fuel retailers in each area can influence prices** because there are fewer competitors or limited options in Waroona and retailers may have less pressure to lower prices, resulting in higher average prices. On the other hand, Mandurah and Murray have more retailers competing for customers, leading to lower average prices.
+
+```{r}
+#| label: countbrandsinpeel
+#| echo: false
+brandcount_peel <- FuelWatch %>%
+  filter(PRODUCT_DESCRIPTION == "ULP", REGION_DESCRIPTION == "Peel") %>%
+  group_by(AREA_DESCRIPTION) %>%
+  summarise(Number_of_Brands = n())
+
+ggplot(brandcount_peel, aes(x = reorder(AREA_DESCRIPTION, Number_of_Brands), y = Number_of_Brands, 
+                            fill = AREA_DESCRIPTION)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  labs(title = "Number of Fuel Station Service Brands in Each Area in Peel Region",
+       x = "Area",
+       y = "Number of Brands",
+       fill = "Area in Peel region") +
+  scale_fill_manual(values = c("Mandurah" = "darkblue", "Murray" = "blue", "Waroona" = "deepskyblue")) +
+  theme_minimal()
+```
+## The Own Unique Pricing Strategies of Each Petrol Station (BONUS ANALYSIS)
+
+Each petrol station may have **its own unique pricing strategy based on factors such as profit margins, market positioning, or customer segmentation.** The pricing decisions made by individual stations can contribute to the overall price dynamic pattern observed in the Murray area.
+
+As you can see in line graph 2.4, we can analyze that *the Canal Shop petrol station* offers a consistent pricing strategy with a stable price of 200 Australian cents over time. This could be due to various factors, such as their business model, cost structure, or a deliberate decision to maintain a steady price point. It may indicate that The Canal Shop aims for price stability to attract and retain customers, even in the face of market fluctuations.
+
+On the contrary, other petrol stations consistently offer a competitive pricing strategy with a lower average fuel price compared to the Canal Shop. This competitive approach may be aimed at attracting customers by offering more affordable fuel options. It could be a deliberate effort by Liberty Pinjarra to gain a larger market share within the region.
+
