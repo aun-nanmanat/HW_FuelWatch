@@ -3,7 +3,7 @@
 ## Data
 
 [Fuel Watch](https://www.fuelwatch.wa.gov.au) is a fuel monitoring service created by the Government of Western Australia. It provides information about fuel prices at the various petrol stations in Western Australia.
-Historical fuel prices are provided in monthly chunks on the website https://www.fuelwatch.wa.gov.au/retail/historic. On this site you find links to csv-files with the data (hint use the right-click menu to copy the link address). That way you can find out that data files are stored at URLs of the following form `https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-MM-YYYY.csv`. 
+Historical fuel prices are provided in monthly chunks on the website https://www.fuelwatch.wa.gov.au/retail/historic. On this site you find links to csv-files with the data. Data files are stored at URLs of the following form `https://warsydprdstafuelwatch.blob.core.windows.net/historical-reports/FuelWatchRetail-MM-YYYY.csv`. 
 
 ## Objective:
 To analyze fuel prices in Western Australia over the last 12 months using data from the FuelWatch service, focusing on price trends, regional variations, and the impact of external factors.
